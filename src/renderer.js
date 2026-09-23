@@ -1,6 +1,6 @@
 const escapeForScript = (value) => JSON.stringify(value ?? "");
 const boolLiteral = (value) => (value ? "true" : "false");
-const ORIGIN_GUARD_FAILURE = "if (typeof qaskOriginAllowed === 'function' && !qaskOriginAllowed()) return { success: false, reason: '网页已跳转到未验证来源；为保护内容已取消发送', autoSent: false };";
+const ORIGIN_GUARD_FAILURE = "if (typeof qaskOriginAllowed === 'function' && !qaskOriginAllowed()) return { success: false, reason: 'The webpage navigated to an unverified source; sending was cancelled to protect your content', autoSent: false };";
 const layoutLifecycleTraceEnabled = typeof window !== "undefined"
   && window.qask?.diagnostics?.layoutLifecycleTraceEnabled === true;
 
@@ -57,13 +57,13 @@ function hasSensitiveLocalFileName(name = "") {
 
 function validateAttachmentMeta(file, existingEntries = []) {
   const kind = getAttachmentKind(file?.type || "");
-  if (!file || !kind) return { valid: false, reason: "仅支持图片、音频和 PDF 附件" };
-  if (hasSensitiveLocalFileName(file.name)) return { valid: false, reason: "为保护本地 GitHub 与凭据数据，不能添加隐藏或敏感文件" };
-  if (!Number.isFinite(file.size) || file.size <= 0) return { valid: false, reason: "附件为空或无法读取" };
-  if (file.size > getAttachmentLimit(kind)) return { valid: false, reason: `${kind === ATTACHMENT_KINDS.image ? "图片" : kind === ATTACHMENT_KINDS.audio ? "音频" : "PDF"} 超过大小限制` };
+  if (!file || !kind) return { valid: false, reason: "Only image, audio, and PDF attachments are supported" };
+  if (hasSensitiveLocalFileName(file.name)) return { valid: false, reason: "Hidden or sensitive files cannot be added to protect local GitHub and credential data" };
+  if (!Number.isFinite(file.size) || file.size <= 0) return { valid: false, reason: "The attachment is empty or cannot be read" };
+  if (file.size > getAttachmentLimit(kind)) return { valid: false, reason: `${kind === ATTACHMENT_KINDS.image ? "Image" : kind === ATTACHMENT_KINDS.audio ? "Audio" : "PDF"} exceeds the size limit` };
   if (existingEntries.length >= ATTACHMENT_LIMITS.maxCount) return { valid: false, reason: `最多添加 ${ATTACHMENT_LIMITS.maxCount} 个附件` };
   const currentTotal = existingEntries.reduce((total, entry) => total + (entry.file?.size || 0), 0);
-  if (currentTotal + file.size > ATTACHMENT_LIMITS.maxTotalBytes) return { valid: false, reason: "附件总大小超过 20 MB" };
+  if (currentTotal + file.size > ATTACHMENT_LIMITS.maxTotalBytes) return { valid: false, reason: "Total attachment size exceeds 20 MB" };
   return { valid: true, kind };
 }
 
@@ -192,11 +192,11 @@ function createDispatchCoordinator() {
 async function settleBroadcastTasks(recipients, dispatch, timeoutMs = 15_000) {
   const boundedTimeout = Math.max(1, Number(timeoutMs) || 15_000);
   return Promise.all((Array.isArray(recipients) ? recipients : []).map(async (recipient) => {
-    const fallbackLabel = recipient?.label || "网页面板";
+    const fallbackLabel = recipient?.label || "Web panel";
     let timerId;
     const timeout = new Promise((resolve) => {
       timerId = setTimeout(() => {
-        resolve({ panel: fallbackLabel, status: "error", message: "发送等待超时；请检查该网页后重试" });
+        resolve({ panel: fallbackLabel, status: "error", message: "Sending timed out; check the webpage and try again" });
       }, boundedTimeout);
     });
     try {
@@ -205,7 +205,7 @@ async function settleBroadcastTasks(recipients, dispatch, timeoutMs = 15_000) {
         timeout,
       ]);
     } catch {
-      return { panel: fallbackLabel, status: "error", message: "发送失败" };
+      return { panel: fallbackLabel, status: "error", message: "Send failed" };
     } finally {
       clearTimeout(timerId);
     }
@@ -259,11 +259,11 @@ function buildOriginGuardedScript(script, allowedOrigins = []) {
     const isAllowedOrigin = () => ${originCheck};
     const qaskOriginAllowed = isAllowedOrigin;
     if (!isAllowedOrigin()) {
-      return { success: false, reason: '网页已跳转到未验证来源；为保护内容已取消发送', autoSent: false };
+      return { success: false, reason: 'The webpage navigated to an unverified source; sending was cancelled to protect your content', autoSent: false };
     }
     const result = await (${script});
     if (!isAllowedOrigin()) {
-      return { success: false, reason: '网页已跳转到未验证来源；为保护内容已取消发送', autoSent: false };
+      return { success: false, reason: 'The webpage navigated to an unverified source; sending was cancelled to protect your content', autoSent: false };
     }
     return result;
   })()`;
@@ -480,7 +480,7 @@ function purgeLegacyStorage() {
     try {
       window.localStorage.removeItem(key);
     } catch (error) {
-      console.warn("[storage] 移除废弃配置失败", error);
+      console.warn("[storage] Failed to remove deprecated configuration", error);
     }
   }
 }
@@ -558,7 +558,7 @@ const buildChatGPTScript = (text, autoSend, _attachments = []) => {
   return `(async () => {
     const target = document.querySelector('textarea[data-id="prompt-textarea"]');
     if (!target) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
     setter.call(target, ${payload});
@@ -598,7 +598,7 @@ const buildGeminiScript = (text, autoSend, _attachments = []) => {
   return `(async () => {
     const editable = document.querySelector('[contenteditable="true"][aria-label]');
     if (!editable) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     editable.focus();
     const selection = window.getSelection();
@@ -651,7 +651,7 @@ const buildDoubaoScript = (text, autoSend, _attachments = []) => {
     const editable = document.querySelector('[contenteditable="true"]');
     const inputTarget = textarea || editable;
     if (!inputTarget) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     if (textarea) {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
@@ -705,7 +705,7 @@ const buildClaudeScript = (text, autoSend, _attachments = []) => {
   return `(async () => {
     const editable = document.querySelector('[data-testid="prompt-textarea"] div[contenteditable="true"], [contenteditable="true"][data-placeholder], [data-testid="composer"] [contenteditable="true"]');
     if (!editable) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     editable.focus();
     const selection = window.getSelection();
@@ -757,7 +757,7 @@ const buildCopilotScript = (text, autoSend, _attachments = []) => {
     const editable = !textarea ? document.querySelector('[contenteditable="true"][role="textbox"], div[contenteditable="true"][aria-label]') : null;
     const target = textarea || editable;
     if (!target) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     if (textarea) {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
@@ -816,7 +816,7 @@ const buildDeepSeekScript = (text, autoSend, _attachments = []) => {
     ];
     const target = selectors.map((selector) => document.querySelector(selector)).find(Boolean);
     if (!target) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     if (target instanceof HTMLTextAreaElement) {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
@@ -872,7 +872,7 @@ const buildKimiScript = (text, autoSend, _attachments = []) => {
     const editable = !textarea ? document.querySelector('[contenteditable="true"][role="textbox"], div[contenteditable="true"][aria-label]') : null;
     const target = textarea || editable;
     if (!target) {
-      return { success: false, reason: "输入框尚未出现" };
+      return { success: false, reason: "The input box is not available yet" };
     }
     if (textarea) {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
@@ -928,7 +928,7 @@ const buildGenericScript = (text, autoSend = false, _attachments = []) => {
 
     const target = findTarget();
     if (!target) {
-      return { success: false, reason: "未找到可填写的输入区域" };
+      return { success: false, reason: "No editable input area was found" };
     }
 
     const applyText = (el) => {
@@ -1146,7 +1146,7 @@ broadcastInput.addEventListener("paste", async (event) => {
   const added = entries.filter(Boolean);
   if (added.length) {
     renderAttachmentPreview();
-    logStatus(`粘贴了 ${added.length} 张图片`, "info");
+    logStatus(`粘贴了 ${added.length} 张Image`, "info");
   }
 });
 
@@ -1328,7 +1328,7 @@ async function addAttachment(file, source = "local") {
   return entry;
 }
 
-sidebarToggle.setAttribute("aria-label", "折叠侧边栏");
+sidebarToggle.setAttribute("aria-label", "Collapse sidebar");
 
 function autoResize(element) {
   if (!element) return;
@@ -1373,7 +1373,7 @@ function logStatus(message, level = "info") {
 
 function getBroadcastBlockReason() {
   if (activeRecorder || recordingStartPending) {
-    return "请先停止或取消录音，再发送消息";
+    return "请先停止或取消录音，再Send message";
   }
   return "";
 }
@@ -1503,7 +1503,7 @@ function registerModel(model, { replace = false } = {}) {
     return false;
   }
   if (model.origin !== "default" && isRestrictedCustomProviderUrl(model.url)) {
-    logStatus("不能将 GitHub 站点注册为 AI 模型，以保护本地 GitHub 信息", "error");
+    logStatus("GitHub sites cannot be registered as AI websites to protect local GitHub information", "error");
     return false;
   }
   const normalized = {
@@ -2123,7 +2123,7 @@ function renderAttachmentPreview() {
     li.dataset.kind = item.kind;
     const kindSpan = document.createElement("span");
     kindSpan.className = "attachment-kind";
-    kindSpan.textContent = item.kind === ATTACHMENT_KINDS.image ? "图片" : item.kind === ATTACHMENT_KINDS.audio ? "音频" : "PDF";
+    kindSpan.textContent = item.kind === ATTACHMENT_KINDS.image ? "Image" : item.kind === ATTACHMENT_KINDS.audio ? "Audio" : "PDF";
     const nameSpan = document.createElement("span");
     nameSpan.textContent = item.file.name;
     const sizeSmall = document.createElement("small");
@@ -2151,7 +2151,7 @@ function clearAttachments() {
 async function startAudioRecording() {
   if (activeRecorder || recordingStartPending) return;
   if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-    logStatus("当前环境不支持本地录音", "error");
+    logStatus("Audio recording is not supported in this environment", "error");
     return;
   }
 
@@ -2170,7 +2170,7 @@ async function startAudioRecording() {
     if (!access?.granted) {
       const reason = access?.reason === "denied" || access?.reason === "restricted"
         ? "未获得麦克风权限；请在系统设置中允许 Qask 使用麦克风后重启应用"
-        : "无法获得麦克风访问权限";
+        : "Unable to obtain microphone access";
       logStatus(reason, "error");
       return;
     }
@@ -2199,11 +2199,11 @@ async function startAudioRecording() {
       session.chunks.push(event.data);
       const recordedBytes = session.chunks.reduce((total, chunk) => total + chunk.size, 0);
       if (recordedBytes >= ATTACHMENT_LIMITS.maxRecordingBytes) {
-        requestRecordingStopForSession(session, { message: "录音达到大小上限，已停止" });
+        requestRecordingStopForSession(session, { message: "Recording reached the size limit and was stopped" });
       }
     });
     recorder.addEventListener("error", () => {
-      requestRecordingStopForSession(session, { discard: true, message: "录音失败，未保留任何音频" });
+      requestRecordingStopForSession(session, { discard: true, message: "录音失败，未保留任何Audio" });
     });
     recorder.addEventListener("stop", () => finalizeRecordingSession(session));
 
@@ -2211,7 +2211,7 @@ async function startAudioRecording() {
     recordingStartPending = false;
     setRecordingControls(true);
     session.limitTimer = setTimeout(() => {
-      requestRecordingStopForSession(session, { message: "录音达到 2 分钟上限，已停止" });
+      requestRecordingStopForSession(session, { message: "Recording reached the 2-minute limit and was stopped" });
     }, ATTACHMENT_LIMITS.maxRecordingDurationMs);
   } catch (error) {
     if (acquiredStream) stopStreamTracks(acquiredStream);
@@ -2220,7 +2220,7 @@ async function startAudioRecording() {
       discardRecordingSession(activeRecordingSession);
     }
     setRecordingControls(false);
-    const reason = error?.name === "NotAllowedError" ? "未获得麦克风权限；请在系统设置中允许 Qask 使用麦克风后重启应用" : "无法访问麦克风";
+    const reason = error?.name === "NotAllowedError" ? "未获得麦克风权限；请在系统设置中允许 Qask 使用麦克风后重启应用" : "Unable to access microphone";
     logStatus(reason, "error");
   } finally {
     if (generation === recordingGeneration && !activeRecorder) {
@@ -2290,7 +2290,7 @@ attachmentPreview.addEventListener("click", (event) => {
   }
   attachments.delete(id);
   renderAttachmentPreview();
-  logStatus("附件已移除", "info");
+  logStatus("Attachment removed", "info");
 });
 
 function selectLayout(layoutId) {
@@ -2337,7 +2337,7 @@ sidebarToggle.addEventListener("click", () => {
   const next = !collapsed;
   controlPanel.dataset.collapsed = String(next);
   sidebarToggle.setAttribute("aria-expanded", String(!next));
-  sidebarToggle.setAttribute("aria-label", next ? "展开侧边栏" : "折叠侧边栏");
+  sidebarToggle.setAttribute("aria-label", next ? "Expand sidebar" : "Collapse sidebar");
 });
 
 if (modelAddButton) {
@@ -2368,14 +2368,14 @@ if (modelAddForm) {
     event.preventDefault();
     const label = modelAddNameInput?.value.trim() || "";
     if (!label) {
-      logStatus("模型名称不能为空", "error");
+      logStatus("Website name cannot be empty", "error");
       modelAddNameInput?.focus();
       return;
     }
 
     const urlInput = modelAddUrlInput?.value.trim() || "";
     if (!urlInput) {
-      logStatus("网站链接不能为空", "error");
+      logStatus("Website URL cannot be empty", "error");
       modelAddUrlInput?.focus();
       return;
     }
@@ -2384,19 +2384,19 @@ if (modelAddForm) {
     try {
       parsedUrl = new URL(urlInput);
     } catch (error) {
-      logStatus("请输入有效的 HTTPS 网址", "error");
+      logStatus("Enter a valid HTTPS URL", "error");
       modelAddUrlInput?.focus();
       return;
     }
 
     if (parsedUrl.protocol !== "https:") {
-      logStatus("仅支持 HTTPS 链接", "error");
+      logStatus("Only HTTPS URLs are supported", "error");
       modelAddUrlInput?.focus();
       return;
     }
 
     if (isRestrictedCustomProviderUrl(parsedUrl)) {
-      logStatus("不能将 GitHub 站点注册为 AI 模型，以保护本地 GitHub 信息", "error");
+      logStatus("GitHub sites cannot be registered as AI websites to protect local GitHub information", "error");
       modelAddUrlInput?.focus();
       return;
     }
@@ -2438,7 +2438,7 @@ broadcastForm.addEventListener("submit", async (event) => {
   }
   const text = broadcastInput.value.trim();
   if (!text && attachments.size === 0) {
-    logStatus("请输入内容或选择附件", "error");
+    logStatus("Enter a message or select an attachment", "error");
     return;
   }
   const draftSnapshot = { text: broadcastInput.value, revision: draftRevision };
@@ -2454,7 +2454,7 @@ broadcastForm.addEventListener("submit", async (event) => {
   isBroadcasting = true;
   syncComposerState();
   // 显示发送状态
-  logStatus(`正在发送消息到 ${activePanelCount} 个模型...`, "info");
+  logStatus(`正在Send message到 ${activePanelCount} 个模型...`, "info");
 
   try {
   const localAttachments = Array.from(attachments.values());
@@ -2511,7 +2511,7 @@ broadcastForm.addEventListener("submit", async (event) => {
       logStatus(`已填充 ${filledCount} 个网页输入框，请在网页中确认发送`, "info");
     }
     if (errorCount > 0) {
-      logStatus(`${errorCount} 个模型发送失败`, "error");
+      logStatus(`${errorCount} 个模型Send failed`, "error");
     }
 
     if (attachmentPayload.length > 0 || attachmentReadFailures.length > 0) {
@@ -2572,7 +2572,7 @@ document.addEventListener('keydown', (event) => {
   }
 
 
-  // Ctrl/Cmd + /: 显示快捷键帮助
+  // Ctrl/Cmd + /: 显示Keyboard Shortcuts
   if ((event.ctrlKey || event.metaKey) && event.key === '/') {
     event.preventDefault();
     showShortcutHelp();
@@ -2581,14 +2581,14 @@ document.addEventListener('keydown', (event) => {
 
 function showShortcutHelp() {
   const helpText = `
-快捷键帮助:
-• Ctrl/Cmd + Enter: 发送消息
-• Alt + ←/→: 切换布局
-• Ctrl/Cmd + /: 显示此帮助
+Keyboard Shortcuts:
+• Ctrl/Cmd + Enter: Send message
+• Alt + ←/→: Switch layout
+• Ctrl/Cmd + /: Show this help
   `.trim();
 
   alert(helpText);
-  logStatus("快捷键帮助", "info");
+  logStatus("Keyboard Shortcuts", "info");
 }
 
 // 更新日期时间显示
@@ -2625,11 +2625,11 @@ collapsedLayoutButtons.forEach((btn) => {
 if (screenshotBtn && window.qask && window.qask.screenshot) {
   // 注册截图回调
   window.qask.screenshot.onSaved(() => {
-    logStatus("截图已保存到本地", "success");
+    logStatus("Screenshot saved locally", "success");
   });
 
   window.qask.screenshot.onCancelled(() => {
-    logStatus("已取消截图", "info");
+    logStatus("Screenshot cancelled", "info");
   });
 
   // 点击截图按钮
@@ -2637,7 +2637,7 @@ if (screenshotBtn && window.qask && window.qask.screenshot) {
     try {
       window.qask.screenshot.take();
     } catch {
-      logStatus("截图功能暂不可用", "error");
+      logStatus("Screenshot is currently unavailable", "error");
     }
   });
 }
@@ -2674,4 +2674,4 @@ modelOrder = normalizeModelOrder(persistedModelOrder, Array.from(modelRegistry.k
 persistModelOrder();
 refreshModelList();
 selectLayout(currentLayout);
-logStatus("Qask 多模型桥接器已启动，请先登录各模型平台", "success");
+logStatus("Qask multi-model bridge started. Sign in to each AI service to begin", "success");
