@@ -1,0 +1,42 @@
+name: Build English macOS App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "main.js"
+      - "preload.js"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/build-english-mac.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macos-15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build Apple Silicon DMG
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm run package:mac
+      - name: Upload English DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Qask-English-macOS-Apple-Silicon
+          path: dist/*.dmg
+          if-no-files-found: error
