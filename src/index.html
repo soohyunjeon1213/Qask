@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Qask Multi-Agent Bridge MVP</title>
@@ -9,14 +9,14 @@
 <body>
   <div class="app-shell">
     <aside class="control-panel" data-collapsed="false">
-      <button id="sidebarToggle" class="collapse-toggle" aria-label="折叠侧边栏" aria-expanded="true">
+      <button id="sidebarToggle" class="collapse-toggle" aria-label="Collapse sidebar" aria-expanded="true">
         <svg class="collapse-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
           <path d="M11.67 3.87L9.9 2.1 0 12l9.9 9.9 1.77-1.77L3.54 12z"/>
           <path d="M22.24 3.87L20.47 2.1 10.57 12l9.9 9.9 1.77-1.77L14.11 12z"/>
         </svg>
       </button>
       <div class="control-body">
-        <!-- 折叠侧边栏工具（仅在折叠时显示） -->
+        <!-- Collapse sidebar工具（仅在折叠时显示） -->
         <div class="collapsed-toolbar">
           <!-- 日期时间显示 -->
           <div class="datetime-display">
@@ -24,53 +24,53 @@
             <div class="time-text" id="collapsedTime">--:--</div>
           </div>
 
-          <!-- 布局控制按钮（纵向） -->
+          <!-- Layout按钮（纵向） -->
           <div class="collapsed-layout-buttons">
-            <button class="collapsed-layout-btn" data-layout="single" data-tooltip="单窗口" title="单窗口布局" aria-label="单窗口布局" aria-pressed="false">
+            <button class="collapsed-layout-btn" data-layout="single" data-tooltip="Single Panel" title="Single-panel layout" aria-label="Single-panel layout" aria-pressed="false">
               <span class="layout-glyph layout-glyph--single"></span>
             </button>
-            <button class="collapsed-layout-btn" data-layout="dual" data-tooltip="双窗口布局" title="双窗口布局" aria-label="双窗口布局" aria-pressed="false">
+            <button class="collapsed-layout-btn" data-layout="dual" data-tooltip="Two-panel layout" title="Two-panel layout" aria-label="Two-panel layout" aria-pressed="false">
               <span class="layout-glyph layout-glyph--dual"></span>
             </button>
-            <button class="collapsed-layout-btn" data-layout="triple" data-tooltip="三窗口布局" title="三窗口布局" aria-label="三窗口布局" aria-pressed="false">
+            <button class="collapsed-layout-btn" data-layout="triple" data-tooltip="Three-panel layout" title="Three-panel layout" aria-label="Three-panel layout" aria-pressed="false">
               <span class="layout-glyph layout-glyph--triple"></span>
             </button>
-            <button class="collapsed-layout-btn" data-layout="quad" data-tooltip="四窗口布局" title="四窗口布局" aria-label="四窗口布局" aria-pressed="false">
+            <button class="collapsed-layout-btn" data-layout="quad" data-tooltip="Four-panel layout" title="Four-panel layout" aria-label="Four-panel layout" aria-pressed="false">
               <span class="layout-glyph layout-glyph--quad"></span>
             </button>
           </div>
 
-          <!-- 截图按钮 -->
-          <button class="collapsed-action-btn" id="screenshotBtn" data-tooltip="截图" title="截取当前对话">
+          <!-- Screenshot按钮 -->
+          <button class="collapsed-action-btn" id="screenshotBtn" data-tooltip="Screenshot" title="Capture current conversation">
             <span>📸</span>
           </button>
         </div>
         <section class="panel-section">
-          <header><h2>布局控制</h2></header>
-          <div class="layout-grid" id="layoutControls" aria-label="窗口布局">
-            <button type="button" class="layout-button" data-layout="single" aria-label="单窗口布局" aria-pressed="false" title="单窗口布局">
+          <header><h2>Layout</h2></header>
+          <div class="layout-grid" id="layoutControls" aria-label="Panel layout">
+            <button type="button" class="layout-button" data-layout="single" aria-label="Single-panel layout" aria-pressed="false" title="Single-panel layout">
               <span class="layout-glyph layout-glyph--single"></span>
             </button>
-            <button type="button" class="layout-button" data-layout="dual" aria-label="双窗口布局" aria-pressed="false" title="双窗口布局">
+            <button type="button" class="layout-button" data-layout="dual" aria-label="Two-panel layout" aria-pressed="false" title="Two-panel layout">
               <span class="layout-glyph layout-glyph--dual"></span>
             </button>
-            <button type="button" class="layout-button" data-layout="triple" aria-label="三窗口布局" aria-pressed="false" title="三窗口布局">
+            <button type="button" class="layout-button" data-layout="triple" aria-label="Three-panel layout" aria-pressed="false" title="Three-panel layout">
               <span class="layout-glyph layout-glyph--triple"></span>
             </button>
-            <button type="button" class="layout-button" data-layout="quad" aria-label="四窗口布局" aria-pressed="false" title="四窗口布局">
+            <button type="button" class="layout-button" data-layout="quad" aria-label="Four-panel layout" aria-pressed="false" title="Four-panel layout">
               <span class="layout-glyph layout-glyph--quad"></span>
             </button>
           </div>
         </section>
         <!-- 网页模型管理 -->
         <section class="panel-section" id="webModeSection">
-          <header><h2>模型网站管理</h2></header>
+          <header><h2>AI Websites</h2></header>
           <div id="webModeContent" class="mode-content">
             <div class="model-stack">
-              <ul id="modelList" class="model-list" aria-label="模型网站排序列表"></ul>
+              <ul id="modelList" class="model-list" aria-label="AI website order"></ul>
               <p id="modelOrderStatus" class="model-order-status" role="status" aria-live="polite"></p>
-              <button id="modelAddButton" class="model-add-button" type="button" aria-label="添加模型" title="添加新的AI模型">
-                <span>+ 添加模型</span>
+              <button id="modelAddButton" class="model-add-button" type="button" aria-label="Add Website" title="Add a new AI website">
+                <span>+ Add Website</span>
               </button>
             </div>
           </div>
@@ -84,24 +84,24 @@
       <footer class="composer">
         <form id="broadcastForm" class="composer-form">
           <div class="composer-input">
-            <button id="addAttachment" type="button" class="input-action-btn add-btn" aria-label="添加附件" title="添加图片、音频或 PDF 附件">
+            <button id="addAttachment" type="button" class="input-action-btn add-btn" aria-label="Add attachment" title="Add image, audio, or PDF attachment">
               <span class="add-icon">+</span>
             </button>
-            <textarea id="broadcastInput" rows="1" spellcheck="true" autofocus aria-label="向当前活动网站发送消息" placeholder="向当前活动网站提问"></textarea>
+            <textarea id="broadcastInput" rows="1" spellcheck="true" autofocus aria-label="Send a message to the active websites" placeholder="Ask the active websites"></textarea>
             <div class="input-right-actions">
-              <button id="recordAudioButton" type="button" class="input-action-btn record-btn" aria-label="录制语音附件" title="录制语音附件">
+              <button id="recordAudioButton" type="button" class="input-action-btn record-btn" aria-label="Record audio attachment" title="Record audio attachment">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
                   <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/>
                   <path d="M19 11a7 7 0 0 1-14 0H3a9 9 0 0 0 8 8.94V22H8v2h8v-2h-3v-2.06A9 9 0 0 0 21 11h-2Z"/>
                 </svg>
               </button>
-              <button id="stopRecordingButton" type="button" class="input-action-btn stop-recording-btn" aria-label="停止录音并添加附件" title="停止录音" hidden>
+              <button id="stopRecordingButton" type="button" class="input-action-btn stop-recording-btn" aria-label="Stop recording并Add attachment" title="Stop recording" hidden>
                 <span aria-hidden="true">■</span>
               </button>
-              <button id="cancelRecordingButton" type="button" class="input-action-btn cancel-recording-btn" aria-label="取消录音" title="取消录音" hidden>
+              <button id="cancelRecordingButton" type="button" class="input-action-btn cancel-recording-btn" aria-label="Cancel recording" title="Cancel recording" hidden>
                 <span aria-hidden="true">×</span>
               </button>
-              <button id="sendButton" type="submit" class="input-action-btn send-btn" aria-label="发送消息" title="发送消息 (Enter)" disabled>
+              <button id="sendButton" type="submit" class="input-action-btn send-btn" aria-label="Send message" title="Send message (Enter)" disabled>
                 <svg class="send-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
                   <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
                 </svg>
@@ -109,7 +109,7 @@
             </div>
             <input id="attachmentInput" type="file" hidden multiple accept="image/png,image/jpeg,image/gif,image/webp,audio/*,application/pdf,.pdf,.webm,.ogg,.mp3,.wav,.m4a,.aac,.flac">
           </div>
-          <ul id="attachmentPreview" class="attachment-preview" aria-label="待发送附件" aria-live="polite"></ul>
+          <ul id="attachmentPreview" class="attachment-preview" aria-label="Attachments to send" aria-live="polite"></ul>
         </form>
       </footer>
     </div>
@@ -117,24 +117,24 @@
   <div id="modelAddDialog" class="model-add-dialog" role="dialog" aria-modal="true" aria-labelledby="modelAddDialogTitle" hidden>
     <div class="model-add-backdrop" data-dismiss></div>
     <div class="model-add-panel">
-      <h3 id="modelAddDialogTitle">添加模型</h3>
+      <h3 id="modelAddDialogTitle">Add Website</h3>
       <form id="modelAddForm" class="model-add-form">
         <label class="model-add-field">
-          <span>模型名称</span>
-          <input id="modelAddName" name="label" type="text" autocomplete="off" required placeholder="例如：Poe" maxlength="32">
+          <span>Website name</span>
+          <input id="modelAddName" name="label" type="text" autocomplete="off" required placeholder="Example: Poe" maxlength="32">
         </label>
         <label class="model-add-field">
-          <span>模型网址</span>
+          <span>Website URL</span>
           <input id="modelAddUrl" name="url" type="url" required placeholder="https://example.com/">
         </label>
-        <p class="model-add-hint">请输入完整 HTTPS 网址。自定义网站默认只填入内容，不会自动发送。</p>
+        <p class="model-add-hint">Enter a complete HTTPS URL. Custom websites fill the message by default but do not send automatically.</p>
         <label class="model-add-autosend">
           <input id="modelAddAutoSend" name="allowAutoSend" type="checkbox">
-          <span>我确认信任此网站，并允许 Qask 自动发送文本</span>
+          <span>I trust this website and allow Qask to send text automatically</span>
         </label>
         <div class="model-add-actions">
-          <button type="button" id="modelAddCancel" class="model-add-cancel">取消</button>
-          <button type="submit" class="model-add-confirm">添加</button>
+          <button type="button" id="modelAddCancel" class="model-add-cancel">Cancel</button>
+          <button type="submit" class="model-add-confirm">Add</button>
         </div>
       </form>
     </div>
